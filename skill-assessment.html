@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Skill Assessment – OptiSkill</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #7c3aed 100%); }
+    .sidebar-item { transition: background 0.15s; }
+    .sidebar-item:hover { background: rgba(255,255,255,0.15); }
+    .sidebar-item.active { background: rgba(255,255,255,0.2); }
+    .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
+    .animate-fade { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .option-btn { transition: all 0.15s; cursor: pointer; }
+    .option-btn:hover { background: #eff6ff; border-color: #3b82f6; }
+    .option-btn.selected { background: #eff6ff; border-color: #3b82f6; color: #1d4ed8; }
+    .option-btn.correct { background: #dcfce7; border-color: #22c55e; color: #15803d; }
+    .option-btn.wrong { background: #fee2e2; border-color: #ef4444; color: #b91c1c; }
+    .modal-overlay { display: none; }
+    .modal-overlay.show { display: flex; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <nav class="gradient-bg text-white px-4 py-3 flex items-center justify-between sticky top-0 z-40 shadow-lg">
+    <div class="flex items-center gap-3">
+      <button onclick="toggleSidebar()" class="lg:hidden text-white"><i class="fas fa-bars text-xl"></i></button>
+      <a href="index.html" class="flex items-center gap-2"><img src="logo.jpg" alt="OptiSkills" class="h-9 w-auto object-contain rounded-md bg-white p-0.5 shadow-sm" /></a>
+    </div>
+    <div class="flex items-center gap-3">
+      <div id="user-avatar" class="w-9 h-9 bg-yellow-400 text-gray-900 font-bold rounded-full flex items-center justify-center cursor-pointer text-sm">A</div>
+    </div>
+  </nav>
+
+  <div class="flex flex-1">
+    <aside id="sidebar" class="gradient-bg text-white w-64 min-h-screen p-4 flex flex-col gap-1 fixed lg:static z-30 top-14 left-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+      <div class="bg-white/10 rounded-xl p-3 mb-4 text-center">
+        <div id="sb-avatar" class="w-14 h-14 bg-yellow-400 text-gray-900 font-bold rounded-full flex items-center justify-center mx-auto text-xl mb-2">A</div>
+        <p class="font-semibold text-sm" id="sb-name">Arjun Sharma</p>
+        <p class="text-white/60 text-xs" id="sb-email">student@optiskill.com</p>
+      </div>
+      
+      <a href="dashboard.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-home w-5 text-center"></i> Dashboard</a>
+      <a href="internships.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-briefcase w-5 text-center"></i> Internships</a>
+      <a href="scholarships.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-medal w-5 text-center"></i> Scholarships</a>
+      <a href="placements.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-user-tie w-5 text-center"></i> Jobs</a>
+      <a href="skill-assessment.html" class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-brain w-5 text-center"></i> Skill Assessment</a>
+      <a href="ats-checker.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-file-alt w-5 text-center"></i> ATS CV Checker</a>
+      <a href="roadmap.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-route w-5 text-center"></i> Career Roadmap</a>
+      <a href="profile.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-user w-5 text-center"></i> My Profile</a>
+
+      <div class="mt-auto pt-4 border-t border-white/20">
+        <button onclick="logout()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium sidebar-item text-red-300"><i class="fas fa-sign-out-alt w-5 text-center"></i> Logout</button>
+      </div>
+    </aside>
+
+    <main class="flex-1 p-4 md:p-6 overflow-auto">
+      <!-- Assessment List View -->
+      <div id="list-view">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-800">🧠 Skill Assessment</h1>
+            <p class="text-gray-400 text-sm mt-1">Test your skills and earn certificates</p>
+          </div>
+        </div>
+
+        <!-- Completed badges -->
+        <div id="badges-section" class="bg-white rounded-2xl p-5 mb-6 shadow-sm border border-gray-100 hidden">
+          <h3 class="font-bold text-gray-800 mb-3">🏅 My Certificates</h3>
+          <div id="badges-container" class="flex flex-wrap gap-3"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="assessment-cards"></div>
+      </div>
+
+      <!-- Quiz View -->
+      <div id="quiz-view" class="hidden max-w-2xl mx-auto">
+        <div class="flex items-center gap-4 mb-6">
+          <button onclick="backToList()" class="flex items-center gap-2 text-gray-500 hover:text-gray-800 text-sm font-semibold"><i class="fas fa-arrow-left"></i> Back</button>
+          <div class="flex-1">
+            <div class="flex items-center justify-between mb-1">
+              <span id="quiz-title-bar" class="font-bold text-gray-800 text-lg"></span>
+              <span id="quiz-timer" class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-bold">10:00</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2">
+              <div id="progress-bar" class="gradient-bg h-2 rounded-full transition-all" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="quiz-card" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 animate-fade">
+          <p id="question-counter" class="text-gray-400 text-sm mb-4">Question 1 of 5</p>
+          <h2 id="question-text" class="text-xl font-bold text-gray-800 mb-6"></h2>
+          <div id="options-container" class="space-y-3"></div>
+          <div class="flex justify-between mt-8">
+            <button id="prev-btn" onclick="prevQuestion()" class="px-5 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">← Previous</button>
+            <button id="next-btn" onclick="nextQuestion()" class="px-5 py-2.5 gradient-bg text-white rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed">Next →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result View -->
+      <div id="result-view" class="hidden max-w-lg mx-auto text-center">
+        <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 animate-fade">
+          <div id="result-emoji" class="text-7xl mb-4"></div>
+          <h2 id="result-title" class="text-2xl font-bold text-gray-800 mb-2"></h2>
+          <p id="result-subtitle" class="text-gray-400 mb-6"></p>
+          <div class="w-32 h-32 rounded-full border-8 border-gray-100 flex items-center justify-center mx-auto mb-6 relative">
+            <div id="score-ring" class="absolute inset-0 rounded-full" style="background: conic-gradient(#2563eb 0%, #e5e7eb 0%)"></div>
+            <div class="relative z-10 text-center">
+              <div id="score-display" class="text-3xl font-bold text-blue-600"></div>
+              <div class="text-gray-400 text-xs">Score</div>
+            </div>
+          </div>
+          <div id="certificate-badge" class="hidden bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
+            <div class="text-3xl mb-2">🏆</div>
+            <p class="font-bold text-yellow-700">Certificate Earned!</p>
+            <p class="text-yellow-600 text-sm" id="cert-name"></p>
+          </div>
+          <div class="flex gap-3">
+            <button onclick="retakeQuiz()" class="flex-1 border border-gray-200 text-gray-600 py-3 rounded-xl font-semibold hover:bg-gray-50">Retake</button>
+            <button onclick="backToList()" class="flex-1 gradient-bg text-white py-3 rounded-xl font-semibold hover:opacity-90">All Assessments</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    const user = requireAuth('student');
+    if (user) {
+      document.getElementById('user-avatar').textContent = user.name[0];
+      document.getElementById('sb-avatar').textContent = user.name[0];
+      document.getElementById('sb-name').textContent = user.name;
+      document.getElementById('sb-email').textContent = user.email;
+    }
+
+    let currentAssessment = null;
+    let currentQ = 0;
+    let answers = [];
+    let timerInterval = null;
+    let timeLeft = 600;
+
+    const COLOR_ICONS = {
+      blue: 'text-blue-600', orange: 'text-orange-500', purple: 'text-purple-600',
+      green: 'text-green-600', indigo: 'text-indigo-600'
+    };
+    const COLOR_BG = {
+      blue: 'bg-blue-100', orange: 'bg-orange-100', purple: 'bg-purple-100',
+      green: 'bg-green-100', indigo: 'bg-indigo-100'
+    };
+
+    function getCompletedTests() { return JSON.parse(localStorage.getItem('optiskill_tests') || '{}'); }
+    function saveTest(id, score) { const t = getCompletedTests(); t[id] = score; localStorage.setItem('optiskill_tests', JSON.stringify(t)); }
+
+    function renderAssessments() {
+      const completed = getCompletedTests();
+      const cards = document.getElementById('assessment-cards');
+      const badges = document.getElementById('badges-section');
+      const badgeCont = document.getElementById('badges-container');
+      const earned = Object.entries(completed).filter(([k, v]) => v >= 60);
+
+      if (earned.length) {
+        badges.classList.remove('hidden');
+        badgeCont.innerHTML = earned.map(([id, score]) => {
+          const a = ASSESSMENTS.find(x => x.id === id);
+          return a ? `<div class="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-2 flex items-center gap-2 text-sm font-semibold text-yellow-700">${a.badge} ${a.title} (${score}%)</div>` : '';
+        }).join('');
+      }
+
+      cards.innerHTML = ASSESSMENTS.map(a => {
+        const done = completed[a.id];
+        const c = COLOR_BG[a.color] || 'bg-blue-100';
+        const ic = COLOR_ICONS[a.color] || 'text-blue-600';
+        return `
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 card-hover animate-fade">
+          <div class="flex items-start justify-between mb-4">
+            <div class="w-14 h-14 ${c} rounded-2xl flex items-center justify-center">
+              <i class="${a.icon} ${ic} text-2xl"></i>
+            </div>
+            ${done !== undefined
+              ? `<span class="${done >= 60 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'} text-xs font-semibold px-2 py-1 rounded-full">${done >= 60 ? '✓ Passed' : 'Retake'}</span>`
+              : `<span class="bg-gray-100 text-gray-500 text-xs font-semibold px-2 py-1 rounded-full">${a.level}</span>`
+            }
+          </div>
+          <h3 class="font-bold text-gray-800 mb-1">${a.title}</h3>
+          <div class="flex gap-3 text-gray-400 text-xs mb-4">
+            <span><i class="fas fa-question-circle mr-1"></i>${a.questions} Questions</span>
+            <span><i class="fas fa-clock mr-1"></i>${a.time}</span>
+          </div>
+          ${done !== undefined ? `<div class="bg-gray-50 rounded-xl p-2 mb-3 text-center text-sm text-gray-600">Last Score: <strong class="${done >= 60 ? 'text-green-600' : 'text-red-500'}">${done}%</strong></div>` : ''}
+          <button onclick="startQuiz('${a.id}')" class="w-full gradient-bg text-white py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition">
+            ${done !== undefined ? 'Retake Test' : 'Start Test'} →
+          </button>
+        </div>`;
+      }).join('');
+    }
+
+    let currentQuestions = [];
+
+    async function startQuiz(id) {
+      clearInterval(timerInterval);
+      currentAssessment = ASSESSMENTS.find(a => a.id === id);
+      
+      // Request question dataset via the backend-ready abstraction layer
+      const dataset = await getQuestions(id);
+      // Select exactly 20 randomized questions without duplicates
+      currentQuestions = selectRandomQuestions(dataset, 20);
+      
+      currentQ = 0;
+      answers = new Array(currentQuestions.length).fill(null);
+      // Assessment duration: exactly 30 minutes (1800 seconds)
+      timeLeft = 30 * 60;
+      
+      document.getElementById('list-view').classList.add('hidden');
+      document.getElementById('result-view').classList.add('hidden');
+      document.getElementById('quiz-view').classList.remove('hidden');
+      document.getElementById('quiz-title-bar').textContent = currentAssessment.title;
+      document.getElementById('quiz-timer').className = 'bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-bold';
+      document.getElementById('quiz-timer').textContent = '30:00';
+      
+      renderQuestion();
+      startTimer();
+    }
+
+    function renderQuestion() {
+      const q = currentQuestions[currentQ];
+      const total = currentQuestions.length;
+      document.getElementById('question-counter').textContent = `Question ${currentQ + 1} of ${total}`;
+      document.getElementById('question-text').textContent = q.q;
+      document.getElementById('progress-bar').style.width = ((currentQ) / total * 100) + '%';
+      document.getElementById('prev-btn').disabled = currentQ === 0;
+      document.getElementById('next-btn').textContent = currentQ === total - 1 ? 'Submit →' : 'Next →';
+
+      const optsEl = document.getElementById('options-container');
+      optsEl.innerHTML = q.options.map((opt, i) => `
+        <div class="option-btn border-2 border-gray-100 rounded-xl px-4 py-3 text-sm font-medium text-gray-700 ${answers[currentQ] === i ? 'selected' : ''}"
+          onclick="selectOption(${i})" id="opt-${i}">
+          <span class="inline-block w-6 h-6 rounded-full border-2 border-current text-center leading-5 mr-2 text-xs font-bold">${String.fromCharCode(65+i)}</span>
+          ${opt}
+        </div>`).join('');
+    }
+
+    function selectOption(idx) {
+      answers[currentQ] = idx;
+      document.querySelectorAll('.option-btn').forEach((el, i) => {
+        el.className = 'option-btn border-2 rounded-xl px-4 py-3 text-sm font-medium ' + (i === idx ? 'selected border-blue-400 bg-blue-50 text-blue-700' : 'border-gray-100 text-gray-700');
+      });
+    }
+
+    function nextQuestion() {
+      if (currentQ < currentQuestions.length - 1) {
+        currentQ++;
+        renderQuestion();
+      } else {
+        submitQuiz();
+      }
+    }
+    function prevQuestion() { if (currentQ > 0) { currentQ--; renderQuestion(); } }
+
+    function submitQuiz() {
+      clearInterval(timerInterval);
+      let correct = 0;
+      currentQuestions.forEach((q, i) => { if (answers[i] === q.ans) correct++; });
+      const score = Math.round((correct / currentQuestions.length) * 100);
+      saveTest(currentAssessment.id, score);
+      showResult(score, correct);
+    }
+
+    function showResult(score, correct) {
+      document.getElementById('quiz-view').classList.add('hidden');
+      document.getElementById('result-view').classList.remove('hidden');
+      document.getElementById('score-display').textContent = score + '%';
+      
+      // Visual Graphic: Conic gradient circular progress ring displaying pass/fail score percentage
+      // Multiplies the percentage by 3.6 to map 0-100% to a 0-360 degree arc
+      document.getElementById('score-ring').style.background = `conic-gradient(${score >= 60 ? '#2563eb' : '#ef4444'} ${score * 3.6}deg, #e5e7eb 0deg)`;
+
+      if (score >= 80) {
+        document.getElementById('result-emoji').textContent = '🎉';
+        document.getElementById('result-title').textContent = 'Excellent Work!';
+        document.getElementById('result-subtitle').textContent = `You scored ${score}% (${correct}/${currentAssessment.quizzes.length} correct). Certificate earned!`;
+        document.getElementById('certificate-badge').classList.remove('hidden');
+        document.getElementById('cert-name').textContent = currentAssessment.title + ' – Excellence Certificate';
+      } else if (score >= 60) {
+        document.getElementById('result-emoji').textContent = '👍';
+        document.getElementById('result-title').textContent = 'Good Job!';
+        document.getElementById('result-subtitle').textContent = `You scored ${score}% (${correct}/${currentAssessment.quizzes.length} correct). Certificate earned!`;
+        document.getElementById('certificate-badge').classList.remove('hidden');
+        document.getElementById('cert-name').textContent = currentAssessment.title + ' – Completion Certificate';
+      } else {
+        document.getElementById('result-emoji').textContent = '😔';
+        document.getElementById('result-title').textContent = 'Keep Practicing!';
+        document.getElementById('result-subtitle').textContent = `You scored ${score}% (${correct}/${currentAssessment.quizzes.length} correct). Score 60%+ to earn a certificate.`;
+        document.getElementById('certificate-badge').classList.add('hidden');
+      }
+    }
+
+    function retakeQuiz() { startQuiz(currentAssessment.id); }
+    function backToList() {
+      clearInterval(timerInterval);
+      document.getElementById('quiz-view').classList.add('hidden');
+      document.getElementById('result-view').classList.add('hidden');
+      document.getElementById('list-view').classList.remove('hidden');
+      renderAssessments();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+        const s = (timeLeft % 60).toString().padStart(2, '0');
+        const el = document.getElementById('quiz-timer');
+        el.textContent = m + ':' + s;
+        if (timeLeft <= 60) { el.className = 'bg-red-200 text-red-700 px-3 py-1 rounded-full text-sm font-bold animate-pulse'; }
+        if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(); }
+      }, 1000);
+    }
+
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
+    renderAssessments();
+  </script>
+</body>
+</html>

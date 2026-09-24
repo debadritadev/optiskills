@@ -1,0 +1,64 @@
+﻿ARJUN SHARMA
+Frontend & Full-Stack Web Developer
+Email: arjun.sharma@example.com | Phone: +91 98765 43210 | Location: New Delhi, India
+LinkedIn: linkedin.com/in/arjun-sharma-dev | GitHub: github.com/arjun-sharma-web | Portfolio: arjunsharma.dev
+
+==================================================
+PROFESSIONAL SUMMARY
+==================================================
+Proactive and results-driven Computer Science undergraduate with hands-on experience in building responsive web applications using React.js, Tailwind CSS, JavaScript, and Node.js. Demonstrated ability in optimizing frontend web performance by 35% and collaborating within agile teams. Looking to leverage full-stack skills and problem-solving abilities for high-impact software engineering and internship opportunities.
+
+==================================================
+TECHNICAL SKILLS
+==================================================
+- Programming Languages: JavaScript (ES6+), Python, Java, C++, SQL, HTML5, CSS3
+- Frameworks & Libraries: React.js, Node.js, Express.js, Tailwind CSS, Bootstrap, Redux Toolkit
+- Databases & Tools: MongoDB, PostgreSQL, MySQL, Git, GitHub, Docker, Postman, Linux
+- Core Competencies: Data Structures & Algorithms, RESTful APIs, Object-Oriented Programming (OOP), Agile/Scrum
+
+==================================================
+WORK EXPERIENCE / INTERNSHIPS
+==================================================
+Frontend Developer Intern | TechCorp India | Remote
+June 2024 – August 2024
+- Developed and deployed 12+ responsive web components using React.js and Tailwind CSS, improving cross-device usability.
+- Optimized web asset loading and API payload sizes, decreasing page load latency by 30%.
+- Implemented user authentication workflows and integrated RESTful APIs with state management using Redux Toolkit.
+- Participated in weekly sprint reviews, code audits, and paired programming sessions with senior software engineers.
+
+Web Development Intern | Analytics Hub | Bangalore, India
+December 2023 – February 2024
+- Designed interactive analytics dashboards with Chart.js and React, enabling data visualization for 5,000+ active users.
+- Automated client-side form validation and input sanitization, eliminating 95% of malformed submissions.
+- Built reusable modular UI libraries, speeding up frontend team development cycles by 20%.
+
+==================================================
+KEY PROJECTS
+==================================================
+OptiSkill Platform Prototype | Full-Stack Web Application
+- Built a unified career portal supporting internships, scholarships, placement listings, and skill assessments.
+- Integrated an intelligent client-side ATS CV analyzer evaluating keyword distribution, formatting, and structural completeness.
+- Technologies used: HTML5, CSS3, Tailwind CSS, JavaScript, LocalStorage API.
+
+E-Commerce Portal with Payment Gateway Integration
+- Engineered a scalable e-commerce store with user cart management, product filtering, and order history tracking.
+- Integrated Razorpay sandbox payment gateway with secure checkout processing and webhooks.
+- Achieved a 98+ Google Lighthouse performance rating through code splitting and lazy loading.
+- Technologies used: React.js, Node.js, Express, MongoDB, Tailwind CSS.
+
+==================================================
+EDUCATION
+==================================================
+Bachelor of Technology (B.Tech) in Computer Science and Engineering
+Delhi Technological University (DTU), New Delhi
+Expected Graduation: May 2025 | CGPA: 8.7 / 10.0
+
+Relevant Coursework: Data Structures & Algorithms, Database Management Systems (DBMS), Operating Systems, Computer Networks, Software Engineering.
+
+==================================================
+CERTIFICATIONS & ACHIEVEMENTS
+==================================================
+- Meta Certified Front-End Developer Specialization (Coursera)
+- Python for Data Science and Machine Learning (Udemy)
+- 1st Place Winner – HackDelhi Annual Hackathon 2024 (out of 120+ student teams)
+- Solved 350+ DSA problems across LeetCode and GeeksforGeeks

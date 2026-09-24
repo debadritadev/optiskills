@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile – OptiSkill</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #7c3aed 100%); }
+    .sidebar-item { transition: background 0.15s; }
+    .sidebar-item:hover { background: rgba(255,255,255,0.15); }
+    .sidebar-item.active { background: rgba(255,255,255,0.2); }
+    .animate-fade { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <nav class="gradient-bg text-white px-4 py-3 flex items-center justify-between sticky top-0 z-40 shadow-lg">
+    <div class="flex items-center gap-3">
+      <button onclick="toggleSidebar()" class="lg:hidden text-white"><i class="fas fa-bars text-xl"></i></button>
+      <a href="index.html" class="flex items-center gap-2"><img src="logo.jpg" alt="OptiSkills" class="h-9 w-auto object-contain rounded-md bg-white p-0.5 shadow-sm" /></a>
+    </div>
+    <div class="flex items-center gap-3">
+      <div id="user-avatar" class="w-9 h-9 bg-yellow-400 text-gray-900 font-bold rounded-full flex items-center justify-center cursor-pointer text-sm">A</div>
+    </div>
+  </nav>
+
+  <div class="flex flex-1">
+    <aside id="sidebar" class="gradient-bg text-white w-64 min-h-screen p-4 flex flex-col gap-1 fixed lg:static z-30 top-14 left-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+      <div class="bg-white/10 rounded-xl p-3 mb-4 text-center">
+        <div id="sb-avatar" class="w-14 h-14 bg-yellow-400 text-gray-900 font-bold rounded-full flex items-center justify-center mx-auto text-xl mb-2">A</div>
+        <p class="font-semibold text-sm" id="sb-name">Arjun Sharma</p>
+        <p class="text-white/60 text-xs" id="sb-email">student@optiskill.com</p>
+      </div>
+      
+      <a href="dashboard.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-home w-5 text-center"></i> Dashboard</a>
+      <a href="internships.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-briefcase w-5 text-center"></i> Internships</a>
+      <a href="scholarships.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-medal w-5 text-center"></i> Scholarships</a>
+      <a href="placements.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-user-tie w-5 text-center"></i> Jobs</a>
+      <a href="skill-assessment.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-brain w-5 text-center"></i> Skill Assessment</a>
+      <a href="ats-checker.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-file-alt w-5 text-center"></i> ATS CV Checker</a>
+      <a href="roadmap.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-route w-5 text-center"></i> Career Roadmap</a>
+      <a href="profile.html" class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-user w-5 text-center"></i> My Profile</a>
+
+      <div class="mt-auto pt-4 border-t border-white/20">
+        <button onclick="logout()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium sidebar-item text-red-300"><i class="fas fa-sign-out-alt w-5 text-center"></i> Logout</button>
+      </div>
+    </aside>
+
+    <main class="flex-1 p-4 md:p-6 overflow-auto">
+      <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">👤 My Profile</h1>
+
+        <!-- Profile Header -->
+        <div class="gradient-bg rounded-2xl p-6 text-white mb-6 relative overflow-hidden">
+          <div class="absolute right-0 top-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+          <div class="flex items-center gap-5">
+            <div id="profile-avatar" class="w-20 h-20 bg-yellow-400 text-gray-900 font-bold rounded-2xl flex items-center justify-center text-3xl shadow-lg">A</div>
+            <div>
+              <h2 id="profile-name" class="text-2xl font-bold">Arjun Sharma</h2>
+              <p id="profile-email" class="text-white/70 text-sm">student@optiskill.com</p>
+              <div class="flex gap-2 mt-2 flex-wrap">
+                <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full">B.Tech – CS</span>
+                <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full">Final Year</span>
+                <span class="bg-yellow-400/80 text-gray-900 text-xs px-3 py-1 rounded-full font-semibold">Profile 65% Complete</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="grid grid-cols-3 gap-4 mb-6">
+          <div class="bg-white rounded-2xl p-4 text-center shadow-sm border border-gray-100">
+            <div id="stat-applications" class="text-2xl font-bold text-blue-600">0</div>
+            <div class="text-gray-400 text-xs mt-1">Applications</div>
+          </div>
+          <div class="bg-white rounded-2xl p-4 text-center shadow-sm border border-gray-100">
+            <div id="stat-tests" class="text-2xl font-bold text-purple-600">0</div>
+            <div class="text-gray-400 text-xs mt-1">Tests Taken</div>
+          </div>
+          <div class="bg-white rounded-2xl p-4 text-center shadow-sm border border-gray-100">
+            <div id="stat-certs" class="text-2xl font-bold text-green-600">0</div>
+            <div class="text-gray-400 text-xs mt-1">Certificates</div>
+          </div>
+        </div>
+
+        <!-- Edit Form -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+          <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2"><i class="fas fa-edit text-blue-500"></i> Edit Profile</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-medium text-gray-500 block mb-1">Full Name</label>
+              <input id="edit-name" type="text" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"/>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-500 block mb-1">Email</label>
+              <input id="edit-email" type="email" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" readonly/>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-500 block mb-1">College / University</label>
+              <input id="edit-college" type="text" placeholder="IIT Delhi" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"/>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-500 block mb-1">Degree & Stream</label>
+              <input id="edit-degree" type="text" placeholder="B.Tech – Computer Science" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"/>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-500 block mb-1">Year of Study</label>
+              <select id="edit-year" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white">
+                <option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>Final Year</option><option>Graduated</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-500 block mb-1">Phone</label>
+              <input id="edit-phone" type="tel" placeholder="+91 98765 43210" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"/>
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-xs font-medium text-gray-500 block mb-1">Skills (comma separated)</label>
+              <input id="edit-skills" type="text" placeholder="JavaScript, Python, React, SQL" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"/>
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-xs font-medium text-gray-500 block mb-1">About Me</label>
+              <textarea id="edit-bio" rows="3" placeholder="Tell recruiters about yourself..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"></textarea>
+            </div>
+          </div>
+          <button onclick="saveProfile()" class="mt-4 gradient-bg text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90">Save Changes</button>
+        <!-- CV / Resume Management Section -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-4 pb-3 border-b border-gray-100">
+            <div>
+              <h3 class="font-bold text-gray-800 text-base flex items-center gap-2">
+                <i class="fas fa-file-contract text-blue-600"></i> Resume / CV Management
+              </h3>
+              <p class="text-gray-400 text-xs mt-0.5">Attach or design your CV to apply seamlessly for internships, jobs, and scholarships.</p>
+            </div>
+            <div id="cv-status-badge"></div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Option A: Upload Existing CV -->
+            <div class="border border-dashed border-gray-200 rounded-2xl p-5 text-center bg-gray-50/50 flex flex-col justify-between">
+              <div>
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-lg">
+                  <i class="fas fa-cloud-arrow-up"></i>
+                </div>
+                <h4 class="font-bold text-gray-800 text-sm mb-1">Option A: Upload Existing CV</h4>
+                <p class="text-gray-400 text-xs mb-4">Have an existing resume ready? Upload your PDF, DOCX, or TXT file here.</p>
+                <div id="uploaded-cv-info" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4 text-left">
+                  <div class="flex items-center gap-3">
+                    <i class="fas fa-file-pdf text-red-500 text-xl"></i>
+                    <div class="flex-1 min-w-0">
+                      <p id="uploaded-cv-filename" class="font-semibold text-gray-800 text-xs truncate"></p>
+                      <p id="uploaded-cv-date" class="text-gray-400 text-[10px]"></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <input type="file" id="profile-cv-file" accept=".pdf,.doc,.docx,.txt" class="hidden" onchange="handleCVUpload(event)"/>
+                <button type="button" onclick="document.getElementById('profile-cv-file').click()" class="w-full bg-white border border-gray-200 text-gray-700 py-2.5 rounded-xl text-xs font-semibold hover:bg-gray-50 flex items-center justify-center gap-2 transition">
+                  <i class="fas fa-upload"></i> <span id="upload-btn-label">Choose File to Upload</span>
+                </button>
+                <p class="text-[10px] text-gray-400 mt-2">Ready for future cloud/server storage integration</p>
+              </div>
+            </div>
+
+            <!-- Option B: Create or Edit CV -->
+            <div class="border border-gray-100 rounded-2xl p-5 bg-gradient-to-br from-blue-50/40 via-purple-50/30 to-white flex flex-col justify-between">
+              <div>
+                <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-lg">
+                  <i class="fas fa-pen-ruler"></i>
+                </div>
+                <h4 id="option-b-title" class="font-bold text-gray-800 text-sm mb-1">Option B: Create a CV</h4>
+                <p id="option-b-desc" class="text-gray-500 text-xs mb-4">Design an ATS-friendly, professional resume in minutes using our step-by-step CV builder.</p>
+                
+                <div id="created-cv-status-card" class="hidden bg-purple-50 border border-purple-200 rounded-xl p-3 mb-4 text-left">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="font-bold text-purple-800 text-xs flex items-center gap-1.5"><i class="fas fa-check-circle text-green-500"></i> Active Created CV</p>
+                      <p id="created-cv-name-role" class="text-gray-600 text-xs mt-0.5"></p>
+                    </div>
+                    <span class="bg-purple-200 text-purple-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Saved</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <a id="cv-action-link" href="cv-creator.html" class="w-full gradient-bg text-white py-2.5 rounded-xl text-xs font-bold text-center block hover:opacity-90 shadow-sm transition">
+                  <span id="cv-action-btn-text">Open CV Creator</span> →
+                </a>
+                <p class="text-[10px] text-gray-400 text-center mt-2">Dynamic experience: CV Creator (New) vs CV Editor (Returning)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Applications History -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+          <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2"><i class="fas fa-history text-purple-500"></i> Application History</h3>
+          <div id="app-history" class="space-y-3"></div>
+        </div>
+
+        <!-- Test Scores -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2"><i class="fas fa-trophy text-yellow-500"></i> Skill Test Scores</h3>
+          <div id="test-scores" class="space-y-3"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    let _profile = null;
+
+    // ── Supabase auth + profile load ─────────────────────────────────
+    (async () => {
+      _profile = await requireAuth('student');
+      if (!_profile) return;
+
+      // Populate sidebar & header
+      const initials = (_profile.name || 'S')[0].toUpperCase();
+      document.getElementById('user-avatar').textContent = initials;
+      document.getElementById('sb-avatar').textContent = initials;
+      document.getElementById('sb-name').textContent = _profile.name || 'Student';
+      document.getElementById('profile-name').textContent = _profile.name || 'Student';
+      document.getElementById('profile-avatar').textContent = initials;
+
+      // Populate edit form fields from Supabase profile
+      document.getElementById('edit-name').value  = _profile.name    || '';
+      document.getElementById('edit-email').value = ''; // not exposed from profile; use auth email if needed
+      if (_profile.college)      document.getElementById('edit-college').value = _profile.college;
+      if (_profile.degree)       document.getElementById('edit-degree').value  = _profile.degree;
+      if (_profile.phone)        document.getElementById('edit-phone').value   = _profile.phone;
+      if (_profile.skills)       document.getElementById('edit-skills').value  = _profile.skills;
+      if (_profile.bio)          document.getElementById('edit-bio').value     = _profile.bio;
+      if (_profile.year_of_study) {
+        const sel = document.getElementById('edit-year');
+        for (let opt of sel.options) {
+          if (opt.text === _profile.year_of_study) { opt.selected = true; break; }
+        }
+      }
+
+      // ── Stats (applications & tests from localStorage for dummy data compat) ──
+      const applied = getApplied();
+      document.getElementById('stat-applications').textContent = applied.length;
+      const tests = JSON.parse(localStorage.getItem('optiskill_tests') || '{}');
+      const testKeys = Object.keys(tests);
+      document.getElementById('stat-tests').textContent = testKeys.length;
+      document.getElementById('stat-certs').textContent = testKeys.filter(k => tests[k] >= 60).length;
+
+      // ── Application History (from localStorage dummy apply data) ────
+      const appHistEl = document.getElementById('app-history');
+      if (applied.length === 0) {
+        appHistEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">No applications yet. Start applying! 🚀</p>';
+      } else {
+        const allItems = [
+          ...INTERNSHIPS.map(i => ({...i, type:'internship'})),
+          ...SCHOLARSHIPS.map(i => ({...i, type:'scholarship'})),
+          ...PLACEMENTS.map(i => ({...i, type:'job'}))
+        ];
+        const appliedItems = applied.map(key => {
+          const [type, id] = key.split('-');
+          return allItems.find(i => i.type === type && i.id === parseInt(id));
+        }).filter(Boolean);
+        const icons = { internship: '💼', scholarship: '🏆', job: '👔' };
+        appHistEl.innerHTML = appliedItems.map(item => `
+          <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+            <div class="text-2xl">${icons[item.type]}</div>
+            <div class="flex-1">
+              <p class="font-semibold text-gray-800 text-sm">${item.title}</p>
+              <p class="text-gray-400 text-xs">${item.company || item.org} • ${item.type.charAt(0).toUpperCase() + item.type.slice(1)}</p>
+            </div>
+            <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full font-semibold">Applied</span>
+          </div>`).join('');
+      }
+
+      // ── Test Scores (from localStorage for skill-assessment compat) ──
+      const testEl = document.getElementById('test-scores');
+      if (testKeys.length === 0) {
+        testEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">No tests taken yet. Visit Skill Assessment! 🧠</p>';
+      } else {
+        testEl.innerHTML = testKeys.map(k => {
+          const a = ASSESSMENTS.find(x => x.id === k);
+          if (!a) return '';
+          const score = tests[k];
+          const passed = score >= 60;
+          return `
+          <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+            <div class="text-2xl">${a.badge}</div>
+            <div class="flex-1">
+              <div class="flex items-center justify-between mb-1">
+                <p class="font-semibold text-gray-800 text-sm">${a.title}</p>
+                <span class="${passed ? 'text-green-600' : 'text-red-500'} font-bold text-sm">${score}%</span>
+              </div>
+              <div class="w-full bg-gray-100 rounded-full h-1.5">
+                <div class="${passed ? 'bg-green-500' : 'bg-red-400'} h-1.5 rounded-full" style="width:${score}%"></div>
+              </div>
+            </div>
+            ${passed ? '<span class="text-yellow-500 text-lg">🏅</span>' : ''}
+          </div>`;
+        }).join('');
+      }
+
+      // ── CV UI ────────────────────────────────────────────────────────
+      updateCVStatusUI();
+    })();
+
+    // ── Save profile to Supabase ─────────────────────────────────────
+    async function saveProfile() {
+      if (!_profile) { showProfileToast('Not logged in.', true); return; }
+
+      const btn = document.querySelector('button[onclick="saveProfile()"]');
+      if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+      const name = document.getElementById('edit-name').value.trim();
+      if (!name || name.length < 2) {
+        showProfileToast('Please enter your full name.', true);
+        if (btn) { btn.disabled = false; btn.textContent = 'Save Changes'; }
+        return;
+      }
+
+      const fields = {
+        name,
+        college:      document.getElementById('edit-college').value.trim() || null,
+        degree:       document.getElementById('edit-degree').value.trim()  || null,
+        year_of_study:document.getElementById('edit-year').value           || null,
+        phone:        document.getElementById('edit-phone').value.trim()   || null,
+        skills:       document.getElementById('edit-skills').value.trim()  || null,
+        bio:          document.getElementById('edit-bio').value.trim()     || null,
+      };
+
+      const { error } = await saveProfileData(_profile.id, fields);
+      if (btn) { btn.disabled = false; btn.textContent = 'Save Changes'; }
+
+      if (error) {
+        showProfileToast('Failed to save. Please try again.', true);
+      } else {
+        // Update local cache
+        Object.assign(_profile, fields);
+        document.getElementById('profile-name').textContent = name;
+        document.getElementById('sb-name').textContent = name;
+        document.getElementById('user-avatar').textContent = name[0].toUpperCase();
+        document.getElementById('sb-avatar').textContent = name[0].toUpperCase();
+        document.getElementById('profile-avatar').textContent = name[0].toUpperCase();
+        showProfileToast('Profile saved! ✅');
+      }
+    }
+
+    // ── CV Management (localStorage for file metadata) ───────────────
+    function updateCVStatusUI() {
+      const uploadedCV = JSON.parse(localStorage.getItem('optiskill_uploaded_cv') || 'null');
+      const createdCV  = JSON.parse(localStorage.getItem('optiskill_cv') || 'null');
+
+      const badgeEl       = document.getElementById('cv-status-badge');
+      const upInfo        = document.getElementById('uploaded-cv-info');
+      const upBtnLabel    = document.getElementById('upload-btn-label');
+      const optBTitle     = document.getElementById('option-b-title');
+      const optBDesc      = document.getElementById('option-b-desc');
+      const createdCard   = document.getElementById('created-cv-status-card');
+      const createdNameRole = document.getElementById('created-cv-name-role');
+      const cvActionBtnText = document.getElementById('cv-action-btn-text');
+
+      if (uploadedCV && uploadedCV.filename) {
+        upInfo.classList.remove('hidden');
+        document.getElementById('uploaded-cv-filename').textContent = uploadedCV.filename;
+        document.getElementById('uploaded-cv-date').textContent =
+          'Uploaded: ' + (uploadedCV.uploadedAt ? new Date(uploadedCV.uploadedAt).toLocaleDateString() : 'Recently');
+        upBtnLabel.textContent = 'Replace Uploaded CV';
+      } else {
+        upInfo.classList.add('hidden');
+        upBtnLabel.textContent = 'Choose File to Upload';
+      }
+
+      if (createdCV && createdCV.name) {
+        optBTitle.textContent = 'Option B: Edit Your CV';
+        optBDesc.textContent  = 'You have already created a CV. Modify or add new projects, skills, and work experience.';
+        createdCard.classList.remove('hidden');
+        createdNameRole.textContent = `${createdCV.name} • ${createdCV.role || 'Professional Resume'}`;
+        cvActionBtnText.textContent = 'Open CV Editor';
+      } else {
+        optBTitle.textContent = 'Option B: Create a CV';
+        optBDesc.textContent  = 'Design an ATS-friendly, professional resume in minutes using our step-by-step CV builder.';
+        createdCard.classList.add('hidden');
+        cvActionBtnText.textContent = 'Open CV Creator';
+      }
+
+      if (uploadedCV || createdCV) {
+        badgeEl.innerHTML = '<span class="bg-green-100 text-green-700 text-xs px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5"><i class="fas fa-check-circle"></i> CV Active on Profile</span>';
+      } else {
+        badgeEl.innerHTML = '<span class="bg-yellow-100 text-yellow-700 text-xs px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5"><i class="fas fa-exclamation-circle"></i> No CV Attached Yet</span>';
+      }
+    }
+
+    function handleCVUpload(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const cvRecord = {
+        filename: file.name, sizeBytes: file.size,
+        fileType: file.type || 'application/octet-stream',
+        uploadedAt: new Date().toISOString()
+      };
+      if (file.type === 'text/plain') {
+        const reader = new FileReader();
+        reader.onload = evt => {
+          cvRecord.textContent = evt.target.result;
+          localStorage.setItem('optiskill_uploaded_cv', JSON.stringify(cvRecord));
+          updateCVStatusUI();
+          showProfileToast('CV "' + file.name + '" uploaded! 📄');
+        };
+        reader.readAsText(file);
+      } else {
+        localStorage.setItem('optiskill_uploaded_cv', JSON.stringify(cvRecord));
+        updateCVStatusUI();
+        showProfileToast('CV "' + file.name + '" uploaded! 📄');
+      }
+    }
+
+    function showProfileToast(msg, isError = false) {
+      const t = document.createElement('div');
+      t.className = `fixed bottom-6 right-6 ${isError ? 'bg-red-600' : 'bg-green-600'} text-white px-5 py-3 rounded-xl shadow-lg text-sm font-semibold z-50 animate-fade`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2500);
+    }
+
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
+
+    // Fix: saveProfile name conflict — rename page function to avoid clash with supabase.js helper
+    // The onclick="saveProfile()" in HTML calls the page-level function above.
+    // The Supabase helper is called as saveProfile(_profile.id, fields) within this function.
+    // Note: JavaScript resolves saveProfile to the page-level function here because it's defined below supabase.js.
+    // The inner call to saveProfile(_profile.id, fields) correctly calls the supabase.js helper
+    // because inside the async function _profile is defined and the call matches arity (2 args vs 0 args).
+  </script>
+</body>
+</html>
