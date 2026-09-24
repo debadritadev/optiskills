@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Internships – OptiSkill</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #7c3aed 100%); }
+    .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
+    .sidebar-item { transition: background 0.15s; }
+    .sidebar-item:hover { background: rgba(255,255,255,0.15); }
+    .sidebar-item.active { background: rgba(255,255,255,0.2); }
+    .animate-fade { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-overlay { display: none; }
+    .modal-overlay.show { display: flex; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <nav class="gradient-bg text-white px-4 py-3 flex items-center justify-between sticky top-0 z-40 shadow-lg">
+    <div class="flex items-center gap-3">
+      <button onclick="toggleSidebar()" class="lg:hidden text-white"><i class="fas fa-bars text-xl"></i></button>
+      <a href="index.html" class="flex items-center gap-2">
+        <img src="logo.jpg" alt="OptiSkills" class="h-9 w-auto object-contain rounded-md bg-white p-0.5 shadow-sm" />
+      </a>
+    </div>
+    <div class="flex items-center gap-3">
+      <div id="user-avatar" class="w-9 h-9 bg-yellow-400 text-gray-900 font-bold rounded-full flex items-center justify-center cursor-pointer text-sm">A</div>
+    </div>
+  </nav>
+
+  <div class="flex flex-1">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="gradient-bg text-white w-64 min-h-screen p-4 flex flex-col gap-1 fixed lg:static z-30 top-14 left-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+      <div class="bg-white/10 rounded-xl p-3 mb-4 text-center">
+        <div id="sb-avatar" class="w-14 h-14 bg-yellow-400 text-gray-900 font-bold rounded-full flex items-center justify-center mx-auto text-xl mb-2">A</div>
+        <p class="font-semibold text-sm" id="sb-name">Arjun Sharma</p>
+        <p class="text-white/60 text-xs" id="sb-email">student@optiskill.com</p>
+      </div>
+      
+      <a href="dashboard.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-home w-5 text-center"></i> Dashboard</a>
+      <a href="internships.html" class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-briefcase w-5 text-center"></i> Internships</a>
+      <a href="scholarships.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-medal w-5 text-center"></i> Scholarships</a>
+      <a href="placements.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-user-tie w-5 text-center"></i> Jobs</a>
+      <a href="skill-assessment.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-brain w-5 text-center"></i> Skill Assessment</a>
+      <a href="ats-checker.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-file-alt w-5 text-center"></i> ATS CV Checker</a>
+      <a href="roadmap.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-route w-5 text-center"></i> Career Roadmap</a>
+      <a href="profile.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-user w-5 text-center"></i> My Profile</a>
+
+      <div class="mt-auto pt-4 border-t border-white/20">
+        <button onclick="logout()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium sidebar-item text-red-300"><i class="fas fa-sign-out-alt w-5 text-center"></i> Logout</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 md:p-6 overflow-auto">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">🏢 Internships</h1>
+          <p class="text-gray-400 text-sm mt-1">Discover internship opportunities from top companies</p>
+        </div>
+        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold" id="count-badge">6 Available</span>
+      </div>
+
+      <!-- Filters -->
+      <div class="bg-white rounded-2xl p-4 mb-6 shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
+        <input id="search-input" type="text" placeholder="Search by role or company..." onkeyup="filterCards()" class="flex-1 min-w-[180px] border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"/>
+        <select id="filter-domain" onchange="filterCards()" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white">
+          <option value="">All Domains</option>
+          <option>Technology</option>
+          <option>Data Science</option>
+          <option>Design</option>
+          <option>Marketing</option>
+          <option>Finance</option>
+        </select>
+        <select id="filter-type" onchange="filterCards()" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white">
+          <option value="">All Types</option>
+          <option>Paid</option>
+          <option>Unpaid</option>
+        </select>
+        <select id="filter-location" onchange="filterCards()" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white">
+          <option value="">All Locations</option>
+          <option>Remote</option>
+          <option>Bangalore</option>
+          <option>Delhi</option>
+          <option>Mumbai</option>
+        </select>
+      </div>
+
+      <!-- Cards Grid -->
+      <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+      <div id="no-results" class="hidden text-center py-16">
+        <div class="text-5xl mb-3">🔍</div>
+        <p class="text-gray-500">No internships match your filter. Try adjusting your search.</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detail-modal" class="modal-overlay fixed inset-0 bg-black/50 z-50 items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl animate-fade max-h-[90vh] overflow-y-auto">
+      <div id="modal-content" class="p-6"></div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    // Supabase auth check (async)
+    let _profile = null;
+    let currentInternships = INTERNSHIPS;
+
+    (async () => {
+      _profile = await requireAuth('student');
+      if (!_profile) return;
+      const fn = (_profile.name || 'Student').split(' ')[0];
+      document.getElementById('user-avatar').textContent = fn[0].toUpperCase();
+      const sbAv = document.getElementById('sb-avatar');
+      if (sbAv) sbAv.textContent = fn[0].toUpperCase();
+      const sbN = document.getElementById('sb-name');
+      if (sbN) sbN.textContent = _profile.name || 'Student';
+      const sbE = document.getElementById('sb-email');
+      if (sbE) sbE.textContent = _profile.phone || '';
+
+      try {
+        const dbData = await getOpportunities('internship');
+        if (dbData && dbData.length > 0) {
+          currentInternships = dbData.map(d => ({
+            ...d,
+            desc: d.description || '',
+            skills: Array.isArray(d.skills) ? d.skills : []
+          }));
+        }
+      } catch (err) {
+        console.warn('Using local internships fallback:', err);
+      }
+      renderCards(currentInternships);
+    })();
+
+    function renderCards(data) {
+      const grid = document.getElementById('cards-grid');
+      const noRes = document.getElementById('no-results');
+      document.getElementById('count-badge').textContent = data.length + ' Available';
+      if (data.length === 0) { grid.innerHTML = ''; noRes.classList.remove('hidden'); return; }
+      noRes.classList.add('hidden');
+      grid.innerHTML = data.map(item => {
+        const c = COLOR_MAP[item.color] || COLOR_MAP.blue;
+        const applied = isApplied(item.id, 'internship');
+        return `
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 card-hover animate-fade">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 ${c.bg} ${c.text} font-bold rounded-xl flex items-center justify-center text-sm">${item.logo || 'IN'}</div>
+              <div>
+                <h3 class="font-bold text-gray-800 text-sm leading-tight">${item.title}</h3>
+                <p class="text-gray-400 text-xs">${item.company}</p>
+              </div>
+            </div>
+            <span class="${c.badge} text-xs font-semibold px-2 py-1 rounded-full">${item.type}</span>
+          </div>
+          <div class="flex flex-wrap gap-2 mb-3">
+            <span class="bg-gray-50 text-gray-500 text-xs px-2 py-1 rounded-full flex items-center gap-1"><i class="fas fa-map-marker-alt text-gray-400"></i> ${item.location || 'Remote'}</span>
+            <span class="bg-gray-50 text-gray-500 text-xs px-2 py-1 rounded-full flex items-center gap-1"><i class="fas fa-clock text-gray-400"></i> ${item.duration || 'Flexible'}</span>
+            <span class="bg-gray-50 text-gray-500 text-xs px-2 py-1 rounded-full flex items-center gap-1"><i class="fas fa-rupee-sign text-gray-400"></i> ${item.stipend || 'Competitive'}</span>
+          </div>
+          <div class="flex flex-wrap gap-1 mb-4">
+            ${(item.skills || []).map(s => `<span class="${c.badge} text-xs px-2 py-0.5 rounded-full">${s}</span>`).join('')}
+          </div>
+          <p class="text-gray-400 text-xs mb-3"><i class="fas fa-calendar-alt mr-1"></i> Deadline: ${item.deadline || 'Ongoing'}</p>
+          <div class="flex gap-2">
+            <a href="internship-details.html?id=${item.id}" class="flex-1 text-center border border-gray-200 text-gray-600 py-2 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">Show More Details</a>
+            <button id="apply-btn-${item.id}" onclick="applyNow('${item.id}')" class="flex-1 text-center ${applied ? 'bg-green-100 text-green-700' : c.btn + ' text-white'} py-2 rounded-xl text-sm font-semibold transition">${applied ? '✓ Applied' : 'Apply'}</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function filterCards() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const domain = document.getElementById('filter-domain').value;
+      const type = document.getElementById('filter-type').value;
+      const loc = document.getElementById('filter-location').value;
+      const filtered = currentInternships.filter(i =>
+        (!search || i.title.toLowerCase().includes(search) || i.company.toLowerCase().includes(search)) &&
+        (!domain || i.domain === domain) &&
+        (!type || i.type === type) &&
+        (!loc || (i.location && i.location.includes(loc)))
+      );
+      renderCards(filtered);
+    }
+
+    async function applyNow(id, fromModal = false) {
+      applyTo(id, 'internship');
+      if (_profile && _profile.id) {
+        try {
+          await applyToOpportunity(_profile.id, id);
+        } catch (err) {
+          console.warn('Supabase apply warning:', err);
+        }
+      }
+      const btn = document.getElementById('apply-btn-' + id);
+      if (btn) { btn.className = 'flex-1 bg-green-100 text-green-700 py-2 rounded-xl text-sm font-semibold transition'; btn.textContent = '✓ Applied'; }
+      if (fromModal) {
+        const mb = document.getElementById('modal-apply-btn');
+        if (mb) { mb.className = 'w-full bg-green-100 text-green-700 py-3 rounded-xl font-bold text-sm transition'; mb.textContent = '✓ Already Applied'; }
+      }
+      showToast('Application submitted successfully! 🎉');
+    }
+
+    function showToast(msg) {
+      const t = document.createElement('div');
+      t.className = 'fixed bottom-6 right-6 bg-green-600 text-white px-5 py-3 rounded-xl shadow-lg text-sm font-semibold z-50 animate-fade';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
+
+    document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeDetail(); });
+
+    renderCards(INTERNSHIPS);
+  </script>
+</body>
+</html>

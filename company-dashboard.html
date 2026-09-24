@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Company Dashboard – OptiSkill</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #7c3aed 100%); }
+    .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
+    .sidebar-item { transition: background 0.15s; }
+    .sidebar-item:hover { background: rgba(255,255,255,0.15); }
+    .sidebar-item.active { background: rgba(255,255,255,0.2); }
+    .animate-fade { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-overlay { display: none; }
+    .modal-overlay.show { display: flex; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <nav class="gradient-bg text-white px-4 py-3 flex items-center justify-between sticky top-0 z-40 shadow-lg">
+    <div class="flex items-center gap-3">
+      <button onclick="toggleSidebar()" class="lg:hidden text-white"><i class="fas fa-bars text-xl"></i></button>
+      <a href="index.html" class="flex items-center gap-2"><img src="logo.jpg" alt="OptiSkills" class="h-9 w-auto object-contain rounded-md bg-white p-0.5 shadow-sm" /></a>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full hidden md:block"><i class="fas fa-building mr-1"></i>Company Portal</span>
+      <div id="user-avatar" class="w-9 h-9 bg-yellow-400 text-gray-900 font-bold rounded-full flex items-center justify-center cursor-pointer text-sm">T</div>
+    </div>
+  </nav>
+
+  <div class="flex flex-1">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="gradient-bg text-white w-64 min-h-screen p-4 flex flex-col gap-1 fixed lg:static z-30 top-14 left-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+      <div class="bg-white/10 rounded-xl p-3 mb-4 text-center">
+        <div class="w-14 h-14 bg-yellow-400 text-gray-900 font-bold rounded-full flex items-center justify-center mx-auto text-xl mb-2" id="sb-avatar">T</div>
+        <p class="font-semibold text-sm" id="sb-name">TechCorp HR</p>
+        <p class="text-white/60 text-xs" id="sb-email">company@optiskill.com</p>
+        <span class="mt-2 inline-block text-xs bg-green-400/20 text-green-200 px-3 py-1 rounded-full">Verified Company</span>
+      </div>
+      <a href="company-dashboard.html" class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-home w-5 text-center"></i> Dashboard</a>
+      <a href="#" onclick="showSection('post')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-plus-circle w-5 text-center"></i> Post Opportunity</a>
+      <a href="#" onclick="showSection('listings')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-list w-5 text-center"></i> My Listings</a>
+      <a href="#" onclick="showSection('applicants')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-users w-5 text-center"></i> Applicants</a>
+      <div class="mt-auto pt-4 border-t border-white/20">
+        <button onclick="logout()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium sidebar-item text-red-300"><i class="fas fa-sign-out-alt w-5 text-center"></i> Logout</button>
+      </div>
+    </aside>
+
+    <main class="flex-1 p-4 md:p-6 overflow-auto">
+      <!-- Welcome Banner -->
+      <div class="gradient-bg rounded-2xl text-white p-6 mb-6 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold mb-1">Welcome, <span id="welcome-name">TechCorp</span>! 🏢</h1>
+          <p class="text-white/80 text-sm">Manage your job postings and discover talented students.</p>
+        </div>
+        <div class="hidden md:block text-5xl">🏢</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center">
+          <div class="text-2xl font-bold text-blue-600">3</div>
+          <div class="text-gray-400 text-xs mt-1">Active Posts</div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center">
+          <div class="text-2xl font-bold text-green-600">200</div>
+          <div class="text-gray-400 text-xs mt-1">Total Applicants</div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center">
+          <div class="text-2xl font-bold text-purple-600">24</div>
+          <div class="text-gray-400 text-xs mt-1">Shortlisted</div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center">
+          <div class="text-2xl font-bold text-yellow-600">8</div>
+          <div class="text-gray-400 text-xs mt-1">Hired</div>
+        </div>
+      </div>
+
+      <!-- Dashboard Overview (default) -->
+      <div id="section-overview">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">My Listings</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 card-hover">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fas fa-briefcase text-blue-600"></i></div>
+              <span class="bg-green-100 text-green-600 text-xs font-semibold px-2 py-1 rounded-full">Active</span>
+            </div>
+            <h3 class="font-bold text-gray-800 text-sm">React Developer Intern</h3>
+            <p class="text-gray-400 text-xs mb-3">24 Applications · Deadline: Oct 30</p>
+            <div class="flex gap-2">
+              <button onclick="showSection('applicants')" class="flex-1 border border-gray-200 text-gray-600 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-50">View Applicants</button>
+              <button class="border border-gray-200 text-gray-400 py-1.5 px-3 rounded-lg text-xs hover:bg-gray-50"><i class="fas fa-edit"></i></button>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 card-hover">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center"><i class="fas fa-user-tie text-green-600"></i></div>
+              <span class="bg-green-100 text-green-600 text-xs font-semibold px-2 py-1 rounded-full">Active</span>
+            </div>
+            <h3 class="font-bold text-gray-800 text-sm">Full Stack Developer</h3>
+            <p class="text-gray-400 text-xs mb-3">56 Applications · Deadline: Nov 15</p>
+            <div class="flex gap-2">
+              <button onclick="showSection('applicants')" class="flex-1 border border-gray-200 text-gray-600 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-50">View Applicants</button>
+              <button class="border border-gray-200 text-gray-400 py-1.5 px-3 rounded-lg text-xs hover:bg-gray-50"><i class="fas fa-edit"></i></button>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 card-hover">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center"><i class="fas fa-medal text-purple-600"></i></div>
+              <span class="bg-red-100 text-red-600 text-xs font-semibold px-2 py-1 rounded-full">Closed</span>
+            </div>
+            <h3 class="font-bold text-gray-800 text-sm">Tech Excellence Award</h3>
+            <p class="text-gray-400 text-xs mb-3">120 Applications · Ended Sep 30</p>
+            <div class="flex gap-2">
+              <button onclick="showSection('applicants')" class="flex-1 border border-gray-200 text-gray-600 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-50">View Applicants</button>
+              <button class="border border-red-100 text-red-400 py-1.5 px-3 rounded-lg text-xs hover:bg-red-50"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="showSection('post')" class="gradient-bg text-white px-6 py-3 rounded-xl font-semibold text-sm flex items-center gap-2 hover:opacity-90 transition">
+          <i class="fas fa-plus"></i> Post New Opportunity
+        </button>
+      </div>
+
+      <!-- Post Opportunity Section -->
+      <div id="section-post" class="hidden animate-fade">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">📢 Post New Opportunity</h2>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 max-w-2xl">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="md:col-span-2">
+              <label class="text-xs font-medium text-gray-500 block mb-1">Opportunity Type *</label>
+              <select id="post-type" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white">
+                <option>Internship</option><option>Job / Full-time Role</option><option>Scholarship</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-xs font-medium text-gray-500 block mb-1">Title *</label>
+              <input id="post-title" type="text" placeholder="e.g. React Developer Intern" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"/>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-500 block mb-1">Location</label>
+              <input id="post-location" type="text" placeholder="Remote / Bangalore" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"/>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-500 block mb-1">Stipend / Package</label>
+              <input id="post-stipend" type="text" placeholder="₹15,000/month or ₹6 LPA" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"/>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-500 block mb-1">Duration / Type</label>
+              <input id="post-duration" type="text" placeholder="3 months / Full-time" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"/>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-500 block mb-1">Application Deadline</label>
+              <input id="post-deadline" type="date" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"/>
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-xs font-medium text-gray-500 block mb-1">Skills Required (comma separated)</label>
+              <input id="post-skills" type="text" placeholder="React, JavaScript, Node.js" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"/>
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-xs font-medium text-gray-500 block mb-1">Job Description *</label>
+              <textarea id="post-desc" rows="4" placeholder="Describe the role, responsibilities, and what you're looking for in a candidate..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"></textarea>
+            </div>
+          </div>
+          <div class="flex gap-3 mt-5">
+            <button onclick="showSection('overview')" class="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50">Cancel</button>
+            <button onclick="submitPost()" class="flex-1 gradient-bg text-white py-2.5 rounded-xl text-sm font-bold hover:opacity-90">Submit Post</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Applicants Section -->
+      <div id="section-applicants" class="hidden animate-fade">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">👥 Applicants</h2>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <span class="font-semibold text-gray-700 text-sm">All Applicants (5 shown)</span>
+            <select class="border border-gray-200 rounded-lg px-3 py-1.5 text-xs bg-white focus:outline-none">
+              <option>All Listings</option><option>React Intern</option><option>Full Stack Dev</option>
+            </select>
+          </div>
+          <div class="divide-y divide-gray-50">
+            <div id="applicants-list"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    let _companyProfile = null;
+    let _isPosting = false;
+
+    // ── Supabase auth guard & data load ──────────────────────────────
+    (async () => {
+      _companyProfile = await requireAuth('company');
+      if (!_companyProfile) return;
+
+      const fn = (_companyProfile.name || 'Company').split(' ')[0];
+      document.getElementById('user-avatar').textContent = fn[0].toUpperCase();
+      document.getElementById('sb-avatar').textContent   = fn[0].toUpperCase();
+      document.getElementById('sb-name').textContent     = _companyProfile.name || 'Company';
+      document.getElementById('sb-email').textContent    = _companyProfile.company_name || '';
+      document.getElementById('welcome-name').textContent = fn;
+
+      await loadCompanyData();
+    })();
+
+    async function loadCompanyData() {
+      if (!_companyProfile) return;
+      try {
+        const opps = await getCompanyOpportunities(_companyProfile.id);
+        if (opps && opps.length > 0) {
+          const activeCount = opps.filter(o => o.status === 'active').length;
+          const statActive = document.querySelector('#section-overview .text-2xl.font-bold.text-blue-600');
+          if (statActive) statActive.textContent = activeCount;
+        }
+
+        const apps = await getApplicationsForCompany(_companyProfile.id);
+        if (apps && apps.length > 0) {
+          renderApplicantsList(apps);
+        } else {
+          renderApplicantsList(DUMMY_APPLICANTS);
+        }
+      } catch (err) {
+        console.warn('Using mock company data fallback:', err);
+        renderApplicantsList(DUMMY_APPLICANTS);
+      }
+    }
+
+    // Dummy applicants (kept as mock data fallback)
+    const DUMMY_APPLICANTS = [
+      { id: 'mock-1', name: 'Arjun Sharma',  email: 'arjun@email.com',  college: 'IIT Delhi',       role: 'React Developer Intern',  status: 'Under Review', score: 85 },
+      { id: 'mock-2', name: 'Priya Patel',   email: 'priya@email.com',  college: 'NIT Surat',        role: 'Full Stack Developer',    status: 'Shortlisted',  score: 92 },
+      { id: 'mock-3', name: 'Rohit Verma',   email: 'rohit@email.com',  college: 'VIT Vellore',      role: 'React Developer Intern',  status: 'Applied',      score: 78 },
+      { id: 'mock-4', name: 'Anjali Singh',  email: 'anjali@email.com', college: 'Delhi University', role: 'Full Stack Developer',    status: 'Interview',    score: 88 },
+      { id: 'mock-5', name: 'Karan Mehta',   email: 'karan@email.com',  college: 'BITS Pilani',      role: 'React Developer Intern',  status: 'Hired',        score: 95 },
+    ];
+
+    const statusColor = {
+      'applied':      'bg-gray-100 text-gray-600',
+      'under_review': 'bg-yellow-100 text-yellow-700',
+      'shortlisted':  'bg-blue-100 text-blue-700',
+      'interview':    'bg-purple-100 text-purple-700',
+      'hired':        'bg-green-100 text-green-700',
+      'Applied':      'bg-gray-100 text-gray-600',
+      'Under Review': 'bg-yellow-100 text-yellow-700',
+      'Shortlisted':  'bg-blue-100 text-blue-700',
+      'Interview':    'bg-purple-100 text-purple-700',
+      'Hired':        'bg-green-100 text-green-700',
+    };
+
+    function renderApplicantsList(list) {
+      const container = document.getElementById('applicants-list');
+      if (!container) return;
+      container.innerHTML = list.map(a => {
+        const studentName = a.profiles?.name || a.name || 'Applicant';
+        const college = a.profiles?.college || a.college || 'Engineering College';
+        const role = a.opportunities?.title || a.role || 'Opportunity';
+        const status = a.status || 'applied';
+        const appId = a.id || '';
+        return `
+        <div class="flex items-center gap-4 p-4 hover:bg-gray-50 transition">
+          <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold rounded-xl flex items-center justify-center text-sm">${studentName[0].toUpperCase()}</div>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-gray-800 text-sm">${studentName}</p>
+            <p class="text-gray-400 text-xs truncate">${college} · ${role}</p>
+          </div>
+          <div class="hidden md:flex items-center gap-2">
+            <div class="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-full">ATS: <strong class="text-green-600">${a.score || 85}%</strong></div>
+          </div>
+          <span class="${statusColor[status] || 'bg-gray-100 text-gray-600'} text-xs font-semibold px-2 py-1 rounded-full capitalize">${status.replace('_', ' ')}</span>
+          <div class="flex gap-2">
+            <select data-id="${appId}" class="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none" onchange="updateStatus(this)">
+              <option value="applied" ${status === 'applied' || status === 'Applied' ? 'selected' : ''}>Applied</option>
+              <option value="under_review" ${status === 'under_review' || status === 'Under Review' ? 'selected' : ''}>Under Review</option>
+              <option value="shortlisted" ${status === 'shortlisted' || status === 'Shortlisted' ? 'selected' : ''}>Shortlisted</option>
+              <option value="interview" ${status === 'interview' || status === 'Interview' ? 'selected' : ''}>Interview</option>
+              <option value="hired" ${status === 'hired' || status === 'Hired' ? 'selected' : ''}>Hired</option>
+            </select>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function updateStatus(el) {
+      const row   = el.closest('.flex.items-center');
+      const badge = row.querySelector('.rounded-full.text-xs.font-semibold:not(.bg-gray-50)');
+      const val   = el.value;
+      const appId = el.getAttribute('data-id');
+
+      badge.className = (statusColor[val] || 'bg-gray-100 text-gray-600') + ' text-xs font-semibold px-2 py-1 rounded-full capitalize';
+      badge.textContent = val.replace('_', ' ');
+
+      if (appId && !appId.startsWith('mock-')) {
+        try {
+          await updateApplicationStatus(appId, val);
+        } catch (err) {
+          console.warn('Status update error:', err);
+        }
+      }
+      showToast('Status updated to "' + val.replace('_', ' ') + '"');
+    }
+
+    function showSection(name) {
+      ['overview','post','listings','applicants'].forEach(s => {
+        const el = document.getElementById('section-' + s);
+        if (el) el.classList.add('hidden');
+      });
+      const target = document.getElementById('section-' + name) || document.getElementById('section-overview');
+      if (target) target.classList.remove('hidden');
+    }
+
+    // ── Post Opportunity → Supabase ──────────────────────────────────
+    async function submitPost() {
+      if (_isPosting) return;
+      if (!_companyProfile) { showToast('Please log in again.', 'error'); return; }
+
+      const title = document.getElementById('post-title').value.trim();
+      const desc  = document.getElementById('post-desc').value.trim();
+      if (!title) { showToast('Please enter a title.', 'error'); return; }
+      if (!desc)  { showToast('Please enter a description.', 'error'); return; }
+
+      const typeRaw    = document.getElementById('post-type').value;
+      const typeMap    = { 'Internship': 'internship', 'Job / Full-time Role': 'job', 'Scholarship': 'scholarship' };
+      const type       = typeMap[typeRaw] || 'internship';
+      const location   = document.getElementById('post-location').value.trim()  || null;
+      const stipend    = document.getElementById('post-stipend').value.trim()   || null;
+      const duration   = document.getElementById('post-duration').value.trim()  || null;
+      const deadline   = document.getElementById('post-deadline').value         || null;
+      const skillsRaw  = document.getElementById('post-skills').value.trim();
+      const skills     = skillsRaw ? skillsRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      // Disable submit during request
+      const btn = document.querySelector('button[onclick="submitPost()"]');
+      _isPosting = true;
+      if (btn) { btn.disabled = true; btn.textContent = 'Posting…'; }
+
+      const { data, error } = await createOpportunity(_companyProfile.id, {
+        type, title,
+        company:     _companyProfile.company_name || _companyProfile.name,
+        logo:        (_companyProfile.company_name || _companyProfile.name || 'CO').substring(0, 2).toUpperCase(),
+        location, stipend, duration, deadline,
+        skills,
+        description: desc,
+        color:       'blue',
+      });
+
+      _isPosting = false;
+      if (btn) { btn.disabled = false; btn.textContent = 'Submit Post'; }
+
+      if (error) {
+        showToast('Failed to post. Please try again.', 'error');
+      } else {
+        // Clear form
+        ['post-title','post-location','post-stipend','post-duration','post-skills','post-desc']
+          .forEach(id => { document.getElementById(id).value = ''; });
+        document.getElementById('post-deadline').value = '';
+        showToast('Opportunity "' + title + '" posted successfully! 🎉');
+        showSection('overview');
+      }
+    }
+
+    function showToast(msg, type = 'success') {
+      const t = document.createElement('div');
+      const bg = type === 'error' ? 'bg-red-600' : 'bg-green-600';
+      t.className = `fixed bottom-6 right-6 ${bg} text-white px-5 py-3 rounded-xl shadow-lg text-sm font-semibold z-50 animate-fade`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
+  </script>
+</body>
+</html>

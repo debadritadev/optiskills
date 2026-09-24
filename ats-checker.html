@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ATS CV Checker – OptiSkill</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #7c3aed 100%); }
+    .sidebar-item { transition: background 0.15s; }
+    .sidebar-item:hover { background: rgba(255,255,255,0.15); }
+    .sidebar-item.active { background: rgba(255,255,255,0.2); }
+    .animate-fade { animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .drop-zone { transition: all 0.2s; border: 2px dashed #d1d5db; }
+    .drop-zone.drag-over { border-color: #3b82f6; background: #eff6ff; }
+    .score-ring { transition: all 1.2s cubic-bezier(.4,0,.2,1); }
+    .tip-item { animation: slideIn 0.3s ease forwards; opacity: 0; }
+    @keyframes slideIn { to { opacity: 1; transform: translateX(0); } from { opacity: 0; transform: translateX(-10px); } }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <nav class="gradient-bg text-white px-4 py-3 flex items-center justify-between sticky top-0 z-40 shadow-lg">
+    <div class="flex items-center gap-3">
+      <button onclick="toggleSidebar()" class="lg:hidden text-white"><i class="fas fa-bars text-xl"></i></button>
+      <a href="index.html" class="flex items-center gap-2"><img src="logo.jpg" alt="OptiSkills" class="h-9 w-auto object-contain rounded-md bg-white p-0.5 shadow-sm" /></a>
+    </div>
+    <div class="flex items-center gap-3">
+      <div id="user-avatar" class="w-9 h-9 bg-yellow-400 text-gray-900 font-bold rounded-full flex items-center justify-center cursor-pointer text-sm">A</div>
+    </div>
+  </nav>
+
+  <div class="flex flex-1">
+    <aside id="sidebar" class="gradient-bg text-white w-64 min-h-screen p-4 flex flex-col gap-1 fixed lg:static z-30 top-14 left-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+      <div class="bg-white/10 rounded-xl p-3 mb-4 text-center">
+        <div id="sb-avatar" class="w-14 h-14 bg-yellow-400 text-gray-900 font-bold rounded-full flex items-center justify-center mx-auto text-xl mb-2">A</div>
+        <p class="font-semibold text-sm" id="sb-name">Arjun Sharma</p>
+        <p class="text-white/60 text-xs" id="sb-email">student@optiskill.com</p>
+      </div>
+      
+      <a href="dashboard.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-home w-5 text-center"></i> Dashboard</a>
+      <a href="internships.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-briefcase w-5 text-center"></i> Internships</a>
+      <a href="scholarships.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-medal w-5 text-center"></i> Scholarships</a>
+      <a href="placements.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-user-tie w-5 text-center"></i> Jobs</a>
+      <a href="skill-assessment.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-brain w-5 text-center"></i> Skill Assessment</a>
+      <a href="ats-checker.html" class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-file-alt w-5 text-center"></i> ATS CV Checker</a>
+      <a href="roadmap.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-route w-5 text-center"></i> Career Roadmap</a>
+      <a href="profile.html" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-user w-5 text-center"></i> My Profile</a>
+
+      <div class="mt-auto pt-4 border-t border-white/20">
+        <button onclick="logout()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium sidebar-item text-red-300"><i class="fas fa-sign-out-alt w-5 text-center"></i> Logout</button>
+      </div>
+    </aside>
+
+    <main class="flex-1 p-4 md:p-6 overflow-auto">
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">📄 ATS CV Checker</h1>
+        <p class="text-gray-400 text-sm mt-1">Upload your resume and get an instant ATS compatibility score</p>
+      </div>
+
+      <!-- Info Banner -->
+      <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-6 flex gap-3 items-start">
+        <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+        <div>
+          <p class="text-blue-800 font-semibold text-sm">What is ATS?</p>
+          <p class="text-blue-600 text-xs mt-1">Applicant Tracking Systems (ATS) are software used by companies to filter resumes automatically. A higher ATS score means more chances of your CV reaching a human recruiter.</p>
+        </div>
+      </div>
+
+      <div class="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Profile Resume Source Section -->
+        <div>
+          <!-- Profile CV Detected Card -->
+          <div id="profile-cv-found" class="bg-white rounded-2xl p-6 shadow-sm border border-blue-100 mb-4 hidden animate-fade">
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-xl">
+                  <i class="fas fa-id-card-clip"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-gray-800 text-base">Resume Linked from Profile</h3>
+                  <p id="profile-cv-source-type" class="text-blue-600 text-xs font-semibold"></p>
+                </div>
+              </div>
+              <span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-semibold flex items-center gap-1">
+                <i class="fas fa-check-circle"></i> Ready
+              </span>
+            </div>
+
+            <div class="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-100">
+              <p class="text-xs text-gray-400 mb-1">Active Profile Resume:</p>
+              <p id="profile-cv-name-display" class="font-bold text-gray-800 text-sm"></p>
+              <p id="profile-cv-detail-display" class="text-gray-500 text-xs mt-1"></p>
+            </div>
+
+            <div class="flex items-center justify-between text-xs text-gray-500">
+              <span>Want to update or change your CV?</span>
+              <a href="profile.html" class="text-blue-600 font-semibold hover:underline flex items-center gap-1">
+                Update in Profile <i class="fas fa-arrow-up-right-from-square text-[10px]"></i>
+              </a>
+            </div>
+            <textarea id="cv-text" class="hidden"></textarea>
+          </div>
+
+          <!-- Profile CV Missing Alert Card -->
+          <div id="profile-cv-missing" class="bg-white rounded-2xl p-8 shadow-sm border border-amber-200 mb-4 text-center animate-fade">
+            <div class="w-16 h-16 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+              <i class="fas fa-file-circle-exclamation"></i>
+            </div>
+            <h3 class="font-bold text-gray-800 text-lg mb-1">No Resume Found on Your Profile</h3>
+            <p class="text-gray-500 text-sm max-w-md mx-auto mb-6">
+              The ATS Checker now evaluates your active profile resume directly. Please upload an existing CV or build one on your profile to proceed.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-3">
+              <a href="profile.html" class="gradient-bg text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 shadow-sm transition flex items-center justify-center gap-2">
+                <i class="fas fa-upload"></i> Upload CV in Profile
+              </a>
+              <a href="cv-creator.html" class="bg-white border border-gray-200 text-gray-700 px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2">
+                <i class="fas fa-pen-ruler text-purple-600"></i> Create CV
+              </a>
+            </div>
+          </div>
+
+          <!-- Job Description for keyword match -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mt-4">
+            <p class="text-sm font-semibold text-gray-700 mb-2">Job Description (optional – for keyword match):</p>
+            <textarea id="job-desc" rows="4" placeholder="Paste the job description here to get keyword matching score..." class="w-full border border-gray-200 rounded-xl p-3 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"></textarea>
+          </div>
+
+          <button id="analyze-btn" onclick="analyzeCV()" class="w-full gradient-bg text-white py-3 rounded-xl font-bold mt-4 hover:opacity-90 transition flex items-center justify-center gap-2">
+            <i class="fas fa-search-dollar mr-2"></i>Analyze My CV
+          </button>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="hidden animate-fade">
+          <!-- Score Ring -->
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center mb-4">
+            <h3 class="font-bold text-gray-800 mb-4">ATS Compatibility Score</h3>
+            <div class="relative w-36 h-36 mx-auto mb-4">
+              <svg class="w-full h-full -rotate-90" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="50" fill="none" stroke="#e5e7eb" stroke-width="12"/>
+                <circle id="score-circle" cx="60" cy="60" r="50" fill="none" stroke="#2563eb" stroke-width="12"
+                  stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round" class="score-ring"/>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span id="score-number" class="text-3xl font-bold text-blue-600">0</span>
+                <span class="text-gray-400 text-xs">/ 100</span>
+              </div>
+            </div>
+            <div id="score-label" class="text-lg font-bold mb-1"></div>
+            <div id="score-desc" class="text-gray-400 text-xs"></div>
+          </div>
+
+          <!-- Score Breakdown -->
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-4">
+            <h4 class="font-bold text-gray-800 mb-4">Score Breakdown</h4>
+            <div id="breakdown" class="space-y-3"></div>
+          </div>
+
+          <!-- Tips -->
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <h4 class="font-bold text-gray-800 mb-4">💡 Improvement Tips</h4>
+            <div id="tips-list" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- Placeholder when no analysis -->
+        <div id="no-results" class="hidden lg:flex flex-col items-center justify-center text-center py-12">
+          <div class="text-6xl mb-4">🤖</div>
+          <p class="text-gray-500 font-semibold">Upload your CV to get started</p>
+          <p class="text-gray-400 text-sm mt-1">Our ATS engine will analyze your resume</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    // Supabase async auth guard
+    let _profile = null;
+    (async () => {
+      _profile = await requireAuth('student');
+      if (!_profile) return;
+      const ini = (_profile.name || 'S')[0].toUpperCase();
+      document.getElementById('user-avatar').textContent = ini;
+      const sbAv = document.getElementById('sb-avatar'); if (sbAv) sbAv.textContent = ini;
+      const sbN = document.getElementById('sb-name');    if (sbN) sbN.textContent = _profile.name || 'Student';
+      const sbE = document.getElementById('sb-email');   if (sbE) sbE.textContent = '';
+
+      try {
+        const cvRecords = await getMyCVData(_profile.id);
+        if (cvRecords.created && cvRecords.created.cv_json) {
+          localStorage.setItem('optiskill_cv', JSON.stringify(cvRecords.created.cv_json));
+        }
+        if (cvRecords.uploaded && cvRecords.uploaded.filename) {
+          localStorage.setItem('optiskill_uploaded_cv', JSON.stringify({
+            filename: cvRecords.uploaded.filename,
+            fileSize: cvRecords.uploaded.file_size,
+            textContent: cvRecords.uploaded.cv_json?.text || ''
+          }));
+        }
+        checkProfileResume();
+      } catch (err) {
+        console.warn('Using local CV cache:', err);
+      }
+    })();
+
+
+    // Show placeholder
+    document.getElementById('no-results').classList.remove('hidden');
+
+    const uploadZone = document.getElementById('upload-zone');
+    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+    uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('drag-over'); if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); });
+
+    function handleFileUpload(e) { if (e.target.files[0]) processFile(e.target.files[0]); }
+    function processFile(file) {
+      document.getElementById('upload-placeholder').classList.add('hidden');
+      document.getElementById('file-selected').classList.remove('hidden');
+      document.getElementById('file-name').textContent = file.name;
+      // Read text from txt files
+      if (file.type === 'text/plain') {
+        const reader = new FileReader();
+        reader.onload = e => document.getElementById('cv-text').value = e.target.result;
+        reader.readAsText(file);
+      }
+    }
+
+    let activeCVText = '';
+
+    function checkProfileResume() {
+      const uploaded = JSON.parse(localStorage.getItem('optiskill_uploaded_cv') || 'null');
+      const created = JSON.parse(localStorage.getItem('optiskill_cv') || 'null');
+      
+      const foundEl = document.getElementById('profile-cv-found');
+      const missingEl = document.getElementById('profile-cv-missing');
+      const analyzeBtn = document.getElementById('analyze-btn');
+
+      if (uploaded && (uploaded.filename || uploaded.textContent)) {
+        foundEl.classList.remove('hidden');
+        missingEl.classList.add('hidden');
+        if (analyzeBtn) {
+          analyzeBtn.disabled = false;
+          analyzeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        document.getElementById('profile-cv-source-type').textContent = 'Option A: Uploaded File';
+        document.getElementById('profile-cv-name-display').textContent = uploaded.filename || 'Uploaded Resume';
+        document.getElementById('profile-cv-detail-display').textContent = 'Uploaded ' + (uploaded.uploadedAt ? new Date(uploaded.uploadedAt).toLocaleDateString() : 'Recently') + ' • ' + (uploaded.fileType || 'Document');
+        
+        activeCVText = uploaded.textContent || (uploaded.filename + ' ' + (user.name || '') + ' Education B.Tech Projects Experience Skills Developer');
+        const cvTextEl = document.getElementById('cv-text');
+        if (cvTextEl) cvTextEl.value = activeCVText;
+        return true;
+      } else if (created && created.name) {
+        foundEl.classList.remove('hidden');
+        missingEl.classList.add('hidden');
+        if (analyzeBtn) {
+          analyzeBtn.disabled = false;
+          analyzeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        document.getElementById('profile-cv-source-type').textContent = 'Option B: Created with CV Builder';
+        document.getElementById('profile-cv-name-display').textContent = created.name + ' — ' + (created.role || 'Resume');
+        document.getElementById('profile-cv-detail-display').textContent = (created.degree || 'B.Tech') + ' • ' + (created.college || '') + ' • Skills: ' + (created.skills || 'Technical skills');
+        
+        activeCVText = [
+          created.name, created.role, created.email, created.phone, created.summary,
+          created.degree, created.college, created.skills, created.job1Title, created.job1Desc,
+          created.proj1Title, created.proj1Desc, created.certs
+        ].filter(Boolean).join(' ');
+        const cvTextEl = document.getElementById('cv-text');
+        if (cvTextEl) cvTextEl.value = activeCVText;
+        return true;
+      } else {
+        foundEl.classList.add('hidden');
+        missingEl.classList.remove('hidden');
+        if (analyzeBtn) {
+          analyzeBtn.disabled = true;
+          analyzeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+        return false;
+      }
+    }
+
+    function analyzeCV() {
+      const hasResume = checkProfileResume();
+      if (!hasResume) {
+        alert('No resume found on your profile! Please upload or create your CV in your profile first.');
+        window.location.href = 'profile.html';
+        return;
+      }
+
+      const cvText = (document.getElementById('cv-text') && document.getElementById('cv-text').value.trim()) || activeCVText;
+      const jobDesc = document.getElementById('job-desc').value.trim();
+
+      // Simulate ATS analysis
+      const scores = simulateATSAnalysis(cvText, jobDesc);
+      showResults(scores);
+    }
+
+    function simulateATSAnalysis(cvText, jobDesc) {
+      const text = cvText.toLowerCase();
+
+      // Check for key ATS criteria
+      const hasContactInfo = /email|phone|linkedin|github/.test(text);
+      const hasEducation = /education|degree|bachelor|master|b\.tech|bsc|msc/.test(text);
+      const hasExperience = /experience|internship|project|work/.test(text);
+      const hasSkills = /skills|technologies|tools|proficient|expertise/.test(text);
+      const hasSummary = /summary|objective|profile|about/.test(text);
+      const hasQuantification = /\d+%|\d+ projects?|\d+ years?|\$\d+|₹\d+|\d+ teams?/.test(text);
+      const hasActionVerbs = /developed|built|managed|led|implemented|designed|created|improved|increased/.test(text);
+      const hasFormat = cvText.length > 300;
+
+      // Keyword matching with job description
+      let keywordScore = 60;
+      if (jobDesc) {
+        const jdWords = jobDesc.toLowerCase().split(/\W+/).filter(w => w.length > 4);
+        const matches = jdWords.filter(w => text.includes(w));
+        keywordScore = Math.min(100, Math.round((matches.length / Math.max(jdWords.length, 1)) * 100) + 20);
+      }
+
+      const breakdown = [
+        { label: 'Contact Information', score: hasContactInfo ? 100 : 30, tip: 'Add email, phone, LinkedIn, and GitHub' },
+        { label: 'Education Section', score: hasEducation ? 95 : 20, tip: 'Include your degree, institution, and graduation year' },
+        { label: 'Work / Projects Section', score: hasExperience ? 90 : 25, tip: 'List internships, projects, or work experience' },
+        { label: 'Skills Section', score: hasSkills ? 90 : 20, tip: 'Add a dedicated skills section with relevant technologies' },
+        { label: 'Professional Summary', score: hasSummary ? 85 : 40, tip: 'Add a 2-3 line professional summary at the top' },
+        { label: 'Quantified Achievements', score: hasQuantification ? 80 : 30, tip: 'Add numbers: "Improved performance by 30%"' },
+        { label: 'Action Verbs', score: hasActionVerbs ? 90 : 35, tip: 'Start bullet points with action verbs like "Built", "Led"' },
+        { label: 'Keyword Match (JD)', score: keywordScore, tip: 'Match keywords from the job description' },
+        { label: 'Content Length', score: hasFormat ? 85 : 40, tip: 'Aim for 300-600 words for a 1-page resume' },
+      ];
+
+      if (!cvText) {
+        // Random mock scores when only file uploaded
+        breakdown.forEach(b => { b.score = Math.floor(Math.random() * 40) + 55; });
+        breakdown[7].score = keywordScore;
+      }
+
+      const overall = Math.round(breakdown.reduce((s, b) => s + b.score, 0) / breakdown.length);
+      return { overall, breakdown };
+    }
+
+    function showResults({ overall, breakdown }) {
+      document.getElementById('no-results').classList.add('hidden');
+      document.getElementById('results-section').classList.remove('hidden');
+
+      // --- GRAPHICS / VISUAL RENDERING: Animated SVG Circular Progress Gauge ---
+      // Visual Element: SVG circular stroke meter representing ATS compatibility score (0-100%).
+      // Mathematical Mapping: Circumference of circle with radius r=50 is 2 * PI * 50 ≈ 314.16px.
+      // Dynamic Calculation: strokeDashoffset decreases proportionally to expose the colored perimeter arc.
+      const circle = document.getElementById('score-circle');
+      const numEl = document.getElementById('score-number');
+      const circumference = 314;
+      setTimeout(() => {
+        circle.style.strokeDashoffset = circumference - (circumference * overall / 100);
+        let c = 0;
+        const t = setInterval(() => { c++; numEl.textContent = c; if (c >= overall) clearInterval(t); }, 20);
+      }, 100);
+
+      // Score color
+      if (overall >= 75) {
+        circle.style.stroke = '#22c55e';
+        numEl.className = 'text-3xl font-bold text-green-600';
+        document.getElementById('score-label').innerHTML = '<span class="text-green-600">Excellent!</span>';
+        document.getElementById('score-desc').textContent = 'Your CV is highly ATS-compatible. Great job!';
+      } else if (overall >= 55) {
+        circle.style.stroke = '#f59e0b';
+        numEl.className = 'text-3xl font-bold text-yellow-600';
+        document.getElementById('score-label').innerHTML = '<span class="text-yellow-600">Needs Improvement</span>';
+        document.getElementById('score-desc').textContent = 'A few tweaks can significantly boost your score.';
+      } else {
+        circle.style.stroke = '#ef4444';
+        numEl.className = 'text-3xl font-bold text-red-600';
+        document.getElementById('score-label').innerHTML = '<span class="text-red-600">Needs Major Revision</span>';
+        document.getElementById('score-desc').textContent = 'Your CV needs significant improvements to pass ATS.';
+      }
+
+      // Breakdown bars
+      document.getElementById('breakdown').innerHTML = breakdown.map(b => `
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-gray-600 font-medium">${b.label}</span>
+            <span class="font-bold ${b.score >= 75 ? 'text-green-600' : b.score >= 50 ? 'text-yellow-600' : 'text-red-500'}">${b.score}%</span>
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-2">
+            <div class="h-2 rounded-full transition-all duration-700 ${b.score >= 75 ? 'bg-green-500' : b.score >= 50 ? 'bg-yellow-400' : 'bg-red-400'}" style="width:${b.score}%"></div>
+          </div>
+        </div>`).join('');
+
+      // Tips for low-scoring areas
+      const tips = breakdown
+        .filter(b => b.score < 75)
+        .sort((a, b) => a.score - b.score)
+        .slice(0, 5);
+
+      document.getElementById('tips-list').innerHTML = tips.map((t, i) => `
+        <div class="tip-item flex items-start gap-3 p-3 bg-gray-50 rounded-xl" style="animation-delay:${i * 0.1}s">
+          <div class="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">${i+1}</div>
+          <p class="text-gray-600 text-sm">${t.tip}</p>
+        </div>`).join('') ||
+        `<div class="flex items-center gap-2 text-green-600 font-semibold"><i class="fas fa-check-circle"></i> Your CV looks great! No major improvements needed.</div>`;
+    }
+
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
+  </script>
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OptiSkill – Learn, Grow, Succeed</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS SDK (required before js/supabase.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .gradient-bg {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #7c3aed 100%);
+    }
+
+    .card-hover {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .tab-active {
+      background: #2563eb;
+      color: white;
+    }
+
+    .animate-fade {
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .floating {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2">
+        <img src="logo.jpg" alt="OptiSkills" class="h-9 w-auto object-contain rounded-md bg-white p-0.5 shadow-sm" />
+      </a>
+      <div class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
+        <a href="#features" class="hover:text-blue-600">Features</a>
+        <a href="#how" class="hover:text-blue-600">How It Works</a>
+        <a href="#stats" onclick="scrollToStats(event)" class="hover:text-blue-600 cursor-pointer">Stats</a>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="openModal('student', 'login')"
+          class="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50">Login</button>
+        <button onclick="openModal('student', 'register')"
+          class="px-4 py-2 gradient-bg text-white rounded-lg text-sm font-medium hover:opacity-90">Sign Up</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="gradient-bg text-white py-20 px-4">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
+      <div class="flex-1 text-center md:text-left">
+        <span class="bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full mb-4 inline-block">🚀 #1
+          Student Career Platform</span>
+        <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">Your Gateway to <br /><span
+            class="text-yellow-300">Scholarships, Internships</span><br /> & Career Success</h1>
+        <p class="text-white/80 text-lg mb-8 max-w-lg">Discover opportunities, assess your skills, build your CV, and
+          land your dream role — all in one place.</p>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button onclick="openModal('student', 'register')"
+            class="px-8 py-3 bg-yellow-400 text-gray-900 font-bold rounded-xl hover:bg-yellow-300 transition">Get
+            Started as Student</button>
+          <button onclick="openModal('company', 'register')"
+            class="px-8 py-3 bg-white/20 border border-white/40 text-white font-semibold rounded-xl hover:bg-white/30 transition">Post
+            as Company</button>
+        </div>
+      </div>
+      <div class="flex-1 flex justify-center">
+        <div class="relative floating">
+          <div
+            class="w-72 h-72 bg-white/10 rounded-3xl flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-2xl">
+            <div class="text-center">
+              <div class="text-7xl mb-4">🎓</div>
+              <p class="text-white font-semibold text-lg">500+ Opportunities</p>
+              <p class="text-white/70 text-sm">Updated Daily</p>
+            </div>
+          </div>
+          <div
+            class="absolute -top-4 -right-4 bg-yellow-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+            ✓ Free to Use</div>
+          <div
+            class="absolute -bottom-4 -left-4 bg-green-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+            ATS Checker</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section id="stats" class="bg-white py-16 border-b flex items-center justify-center scroll-mt-12">
+    <div class="max-w-5xl w-full mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      <div>
+        <div class="text-3xl font-bold text-blue-600">12,000+</div>
+        <div class="text-gray-500 text-sm mt-1">Students Registered</div>
+      </div>
+      <div>
+        <div class="text-3xl font-bold text-purple-600">350+</div>
+        <div class="text-gray-500 text-sm mt-1">Companies</div>
+      </div>
+      <div>
+        <div class="text-3xl font-bold text-green-600">800+</div>
+        <div class="text-gray-500 text-sm mt-1">Scholarships Listed</div>
+      </div>
+      <div>
+        <div class="text-3xl font-bold text-yellow-600">5,000+</div>
+        <div class="text-gray-500 text-sm mt-1">Jobs Landed</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="py-16 px-4 bg-gray-50">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">Everything You Need</h2>
+      <p class="text-center text-gray-500 mb-10">One platform, endless opportunities</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white rounded-2xl p-6 shadow-sm card-hover border border-gray-100">
+          <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4"><i
+              class="fas fa-briefcase text-blue-600 text-xl"></i></div>
+          <h3 class="font-bold text-gray-800 mb-2">Internships</h3>
+          <p class="text-gray-500 text-sm">Find paid & unpaid internships from top companies. Filter by domain, location
+            & duration.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm card-hover border border-gray-100">
+          <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4"><i
+              class="fas fa-medal text-purple-600 text-xl"></i></div>
+          <h3 class="font-bold text-gray-800 mb-2">Scholarships</h3>
+          <p class="text-gray-500 text-sm">Explore thousands of scholarships based on merit, need, and field of study.
+          </p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm card-hover border border-gray-100">
+          <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4"><i
+              class="fas fa-user-tie text-green-600 text-xl"></i></div>
+          <h3 class="font-bold text-gray-800 mb-2">Jobs</h3>
+          <p class="text-gray-500 text-sm">Access full-time job offers from companies actively hiring fresh graduates.
+          </p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm card-hover border border-gray-100">
+          <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-4"><i
+              class="fas fa-brain text-yellow-600 text-xl"></i></div>
+          <h3 class="font-bold text-gray-800 mb-2">Skill Assessment</h3>
+          <p class="text-gray-500 text-sm">Take domain-specific quizzes and get certified to stand out from the crowd.
+          </p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm card-hover border border-gray-100">
+          <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mb-4"><i
+              class="fas fa-file-alt text-red-600 text-xl"></i></div>
+          <h3 class="font-bold text-gray-800 mb-2">ATS CV Checker</h3>
+          <p class="text-gray-500 text-sm">Upload your resume and get an instant ATS score with actionable tips to
+            improve.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm card-hover border border-gray-100">
+          <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4"><i
+              class="fas fa-pen-to-square text-indigo-600 text-xl"></i></div>
+          <h3 class="font-bold text-gray-800 mb-2">CV Creator</h3>
+          <p class="text-gray-500 text-sm">Build a professional resume in minutes with our guided step-by-step CV
+            creator tool.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section id="how" class="py-16 px-4 bg-white">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-3xl font-bold text-gray-800 mb-2">How It Works</h2>
+      <p class="text-gray-500 mb-10">3 simple steps to kickstart your career</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div
+            class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
+            1</div>
+          <h3 class="font-bold text-gray-800 mb-2">Create Account</h3>
+          <p class="text-gray-500 text-sm">Sign up as a student and complete your profile with education and skills.</p>
+        </div>
+        <div class="text-center">
+          <div
+            class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
+            2</div>
+          <h3 class="font-bold text-gray-800 mb-2">Explore & Apply</h3>
+          <p class="text-gray-500 text-sm">Browse internships, scholarships, and jobs. Apply with one click.</p>
+        </div>
+        <div class="text-center">
+          <div
+            class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
+            3</div>
+          <h3 class="font-bold text-gray-800 mb-2">Get Selected</h3>
+          <p class="text-gray-500 text-sm">Companies review your profile and reach out. Succeed in your career journey!
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="gradient-bg text-white py-8 px-4 text-center">
+    <div class="flex items-center justify-center gap-2 mb-2"><img src="logo.jpg" alt="OptiSkills" class="h-8 w-auto object-contain rounded bg-white p-0.5" /></div>
+    <p class="text-white/70 text-sm">© 2024 OptiSkill. Built for students, by students. 🚀</p>
+  </footer>
+
+  <!-- Login/Register Modal -->
+  <div id="modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-fade">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">Welcome to OptiSkill</h2>
+          <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i
+              class="fas fa-times text-xl"></i></button>
+        </div>
+
+        <!-- Role Toggle -->
+        <div class="flex bg-gray-100 rounded-xl p-1 mb-6">
+          <button id="tab-student" onclick="setRole('student')"
+            class="flex-1 py-2 rounded-lg text-sm font-semibold transition tab-active">
+            <i class="fas fa-user-graduate mr-1"></i> Student
+          </button>
+          <button id="tab-company" onclick="setRole('company')"
+            class="flex-1 py-2 rounded-lg text-sm font-semibold transition text-gray-600 hover:bg-white">
+            <i class="fas fa-building mr-1"></i> Company
+          </button>
+        </div>
+
+        <!-- Mode Toggle -->
+        <div class="flex gap-4 mb-6 border-b pb-4">
+          <button id="mode-login" onclick="setMode('login')"
+            class="text-blue-600 font-bold text-sm border-b-2 border-blue-600 pb-1">Login</button>
+          <button id="mode-register" onclick="setMode('register')"
+            class="text-gray-400 font-semibold text-sm pb-1">Register</button>
+        </div>
+
+        <form onsubmit="handleAuth(event)">
+          <div id="register-fields" class="hidden">
+            <div class="mb-4">
+              <label class="text-sm font-medium text-gray-700 block mb-1">Full Name</label>
+              <input id="reg-name" type="text" placeholder="Your full name"
+                class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+          </div>
+          <div class="mb-4">
+            <label class="text-sm font-medium text-gray-700 block mb-1">Email Address</label>
+            <input id="auth-email" type="email" placeholder="you@example.com"
+              class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required />
+          </div>
+          <div class="mb-6">
+            <label class="text-sm font-medium text-gray-700 block mb-1">Password</label>
+            <input id="auth-password" type="password"
+              class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required />
+          </div>
+          <div id="error-msg" class="hidden text-red-500 text-sm mb-3 text-center"></div>
+          <button type="submit"
+            class="w-full gradient-bg text-white py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed">
+            <span id="auth-btn-text">Login</span>
+          </button>
+        </form>
+
+        <!-- Forgot Password link (only visible in login mode) -->
+        <p id="forgot-link" class="text-center text-xs mt-3">
+          <a href="#" onclick="handleForgotPassword(event)" class="text-blue-500 hover:underline">Forgot password?</a>
+        </p>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Check if already logged in → redirect automatically ─────────
+    (async () => {
+      const session = await getSession();
+      if (session) {
+        const profile = await getProfile(session.user.id);
+        if (profile) {
+          window.location.href = profile.role === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+        }
+      }
+    })();
+
+    // ── Modal state ──────────────────────────────────────────────────
+    let currentRole = 'student';
+    let currentMode = 'login';
+    let isSubmitting = false;
+
+    function scrollToStats(e) {
+      if (e) e.preventDefault();
+      const stats = document.getElementById('stats');
+      if (stats) stats.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function openModal(role = 'student', mode = 'login') {
+      setRole(role);
+      setMode(mode);
+      document.getElementById('modal').classList.remove('hidden');
+      document.getElementById('modal').classList.add('flex');
+      // Clear previous error messages when opening
+      setError('');
+    }
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+      document.getElementById('modal').classList.remove('flex');
+    }
+    function setRole(role) {
+      currentRole = role;
+      document.getElementById('tab-student').className = 'flex-1 py-2 rounded-lg text-sm font-semibold transition ' +
+        (role === 'student' ? 'tab-active' : 'text-gray-600 hover:bg-white');
+      document.getElementById('tab-company').className = 'flex-1 py-2 rounded-lg text-sm font-semibold transition ' +
+        (role === 'company' ? 'tab-active' : 'text-gray-600 hover:bg-white');
+    }
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('mode-login').className = 'text-sm pb-1 font-bold ' +
+        (mode === 'login' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-400 font-semibold');
+      document.getElementById('mode-register').className = 'text-sm pb-1 font-bold ' +
+        (mode === 'register' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-400 font-semibold');
+      document.getElementById('register-fields').className = mode === 'register' ? 'block' : 'hidden';
+      document.getElementById('forgot-link').style.display = mode === 'login' ? 'block' : 'none';
+      document.getElementById('auth-btn-text').textContent = mode === 'login' ? 'Login' : 'Create Account';
+      setError('');
+    }
+
+    // ── Error / Loading helpers ──────────────────────────────────────
+    function setError(msg) {
+      const el = document.getElementById('error-msg');
+      el.textContent = msg;
+      el.classList.toggle('hidden', !msg);
+    }
+    function setLoading(loading) {
+      isSubmitting = loading;
+      const btn = document.querySelector('#modal button[type="submit"]');
+      if (btn) btn.disabled = loading;
+      document.getElementById('auth-btn-text').textContent = loading
+        ? (currentMode === 'login' ? 'Logging in…' : 'Creating account…')
+        : (currentMode === 'login' ? 'Login' : 'Create Account');
+    }
+
+    // ── Form validation ──────────────────────────────────────────────
+    function validateForm(email, password, name, mode) {
+      if (mode === 'register' && (!name || name.trim().length < 2)) {
+        return 'Please enter your full name (at least 2 characters).';
+      }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return 'Please enter a valid email address.';
+      }
+      if (!password || password.length < 6) {
+        return 'Password must be at least 6 characters.';
+      }
+      return null; // valid
+    }
+
+    // ── Auth form submit ─────────────────────────────────────────────
+    async function handleAuth(e) {
+      e.preventDefault();
+      if (isSubmitting) return;
+
+      const email    = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+      const name     = currentMode === 'register'
+        ? (document.getElementById('reg-name').value || '').trim()
+        : '';
+
+      const validationError = validateForm(email, password, name, currentMode);
+      if (validationError) { setError(validationError); return; }
+
+      setLoading(true);
+      setError('');
+
+      try {
+        if (currentMode === 'login') {
+          const { data, error } = await signIn(email, password);
+          if (error) { setError(friendlyAuthError(error)); return; }
+
+          // Fetch profile to determine role-based redirect
+          const profile = await getProfile(data.user.id);
+          if (!profile) { setError('Account setup incomplete. Please contact support.'); return; }
+
+          window.location.href = profile.role === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+
+        } else {
+          // Register
+          const { data, error } = await signUp(email, password, name, currentRole);
+          if (error) { setError(friendlyAuthError(error)); return; }
+
+          // Supabase may require email confirmation depending on project settings.
+          // If email confirmation is disabled, data.session is available immediately.
+          if (data.session) {
+            window.location.href = currentRole === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+          } else {
+            // Email confirmation required — show info message instead of redirecting
+            setMode('login');
+            setError(''); // clear any error
+            document.getElementById('error-msg').style.color = '#16a34a'; // green
+            document.getElementById('error-msg').textContent = '✅ Account created! Please check your email to confirm your address, then log in.';
+            document.getElementById('error-msg').classList.remove('hidden');
+          }
+        }
+      } catch (err) {
+        console.error('[OptiSkill] handleAuth unexpected error:', err);
+        setError('An unexpected error occurred. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // ── Forgot Password ──────────────────────────────────────────────
+    async function handleForgotPassword(e) {
+      e.preventDefault();
+      const email = document.getElementById('auth-email').value.trim();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setError('Please enter your email address above first.'); return;
+      }
+      setLoading(true);
+      const { error } = await resetPassword(email);
+      setLoading(false);
+      if (error) { setError(friendlyAuthError(error)); return; }
+      setError('');
+      document.getElementById('error-msg').style.color = '#16a34a';
+      document.getElementById('error-msg').textContent = '📧 Password reset email sent! Check your inbox.';
+      document.getElementById('error-msg').classList.remove('hidden');
+    }
+
+    // ── Close modal on backdrop click ────────────────────────────────
+    document.getElementById('modal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+  </script>
+
+</body>
+
+</html>
